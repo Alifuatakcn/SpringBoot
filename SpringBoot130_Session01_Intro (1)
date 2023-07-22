@@ -1,0 +1,163 @@
+My Application
+Bana servis objesi ver
+Spring-Object Factory
+Configuration => MailService - WhatsAppService - SMSService
+
+Singleton Scope - Prototype Scope :Interview her sene çıkan soru!
+
+Spring Container - Temel Fonksiyonları ---------------------------------------------------------------------------------
+1-Objeleri üretmek ve yönetmek(Inversion of control(IoC))
+2-Bağımlılıkları Objeye enjekte etmek(Dependency Injection(DI))
+
+Spring Bean Nedir? -----------------------------------------------------------------------------------------------------
+1)Bean: basit java objeleridir
+2)Spring Container, Java objeleri ürettiği zaman onları Spring Beans diye adlandırır.
+3)Spring Beans'ler normal Java Class'lardan üretilir.
+
+Configuring Spring Container -------------------------------------------------------------------------------------------
+Spring Framework içinde configuration yapmak istiyorsam üç alternatif sunuluyor. Üçü de hala kullanılıyor.
+1-XML Baset(eskidir ve yapılandırması zordur)
+2-Annotation Based(Spring 2.5)
+    XML configurasyonları minimum düzeyde kullanılır
+    ama "component scan" yapısı XML ile yazılır
+3-Code Based (Spring 3.2)
+    Java configuration class kullanır
+    Bütün configuration lar kod içinde yapılır.
+    En günceli
+
+//----------------------------------------------------------------------------------------------------------------------
+Spring Annotations------------------------------------------------------------------------------------------------------
+@Configuration : Configuration için kullanılır
+
+@Component
+@Bean
+
+@Component ve @Bean : IoC dediğimiz new leme yetkisini Spring Framework e vermemizi sağlayan işaretler.
+İkisi de aynı işi yapıyorsa neden iki tane var?
+
+Ne zaman @Component: class based(class level)
+Ne zaman @Bean: method based(method level)
+Her method üzerine @Bean yazabilir miyim? Neden? => Return değeri object olması gerekir. Amacım objenin inject edilmesi.
+Dolayısıyla her method üzerine @Bean yazarım ama Spring Framework un hayal ettiği bir kullanım tarzı olmaz.
+methodun dönen değeri obje ise ve bu objeyi new leme işini Spring Framework e vereceksem o methodu @Bean ile annote ederim.
+
+@ComponentScan : Component ları taramaya başlar. Component ya da Bean ile annote ettiğim class ları scan ediyor, tarıyor. İşaretliyor, kontrol bende diyor.
+                 İstediğim yere koyabilir miyim ComponentScan i? Yeri çok önemli. Child a koyarsam Parent e, GrandParent a gitmez. Child seviyesinde tarama yapar.
+
+@Autowired : Bağımlılık enjekte etmek için kullanılır. Çok kullanılması tavsiye edilmiyor. Farklı varyasyonları var. Kod okunurluğu için kullanılıyor özellikle.
+
+@Qualifier : Seçim yapıcısıdır. Bir interface i implement eden birden fazla class varsa hangi class tan obje üretileceğini seçmek için kullanılır.
+
+Eğer proje genişleyecekse bağımlılıkları interface üzerinden yaparım ki genişlediği zaman interface değiştirmeme gerek kalmaz.
+O interface i implemente eden class ları artırırım. Interface i enjekte ediyorsam, bu interface i implement eden birden fazla class varsa
+acaba hangi classı enjekte edeceğini Spring Framework bilemez. hata fırlatır.
+Interface i enjekte ediyorum ama obje üretemem, bu class lardan birinden obje üretmem gerekiyor.
+Birden fazla class var hangisini seçeyim diye bir belirsizliğe düşer.
+Spring Framework un boyle bir belirsizliğe düşmemesi için @Qualifier annotation ile enjekte etmesini istediğimiz class ı belirtmemiz gerekiyor.
+Hangi class imi code bloğuna enjekte etmek istiyorsam bu class i @Qualifier ile işaretlemem gerekiyor.
+
+Injection Tipleri ------------------------------------------------------------------------------------------------------
+1-Constructor Injection: public erişim belirleyicisi vardır. Üzerine Autowired yazıyoruz ama yazmadığımız durumlar da var.
+Hangi durumda Autowired koymamız gerekiyor: eğer 1 tane constructor varsa gerek yok,
+bir class içinde +1 constructor varsa hangi constructor in injection için kullanılması gerektiğini belirtmek için o constructor üzerine Autowired annotation ını ekliyorum.
+constructor public olduğu için, paramterelerindeki enjekte edilen değişkeni, objeyi, class ları da görebiliyorum. bu class içinde bu consturctor kullanılmış,
+parametre olarak da şu şu class lar kullanılmış demek ki enjection edilmiş. Spring Framework ün dokümantasyonunda da constructor injection kullanılması önerilmiş.
+2-Setter Injection
+3-Field Injection: Enjekte edeceğimiz değişkenni erişim belirleyicisi private. rol service e gidiyoruz. autowired koyarak field injection ı kullanmış oluyoruz.
+Değişken private olduğu için class in dışından ulaşma imkanımız yok. Dışarıdan bakan bir developer bu class in dışında runner tarafında bir code yazacağı zaman
+ya da farklı bir şekilde bu class ile iletişime geçecekse bu field in injection yapıldığını anlama ihtimali yok gibi bir şey cünkü private, görme ihtimali yok.
+
+Üçünü de bağımlılıklarımızı code bloğuna enjekte etmek için kullanıyoruz. Üçü de aynı işi yapar. Tavsiye edilen constructor injection.
+Neden constructor injection: Yukarıda açıklıyor. public.
+
+Bean Scopes-------------------------------------------------------------------------------------------------------------
+1- Scope : bean in yaşam döngüsü
+2- Tanımladığı alanlar:
+    Ne kadar yaşayacak?
+    Kaç tane instance üretilecek?
+    Nasıl paylaşılacak?
+
+Bean Scopes Singleton --------------------------------------------------------------------------------------------------
+1-Bütün bean ler default olarak singleton üretilir
+2-Spring IoC Container her bean den sadece 1 tane instance oluşturur.
+3-Beans'ler memory de tutulur.
+
+Bean Scopes (Singleton) ------------------------------------------------------------------------------------------------
+@Component
+@Scope("singleton")//default scope => @Scope annotation koyarak scope değiştirilebilir.
+public class MailService implements MessageService{}
+
+Bean Scopes (Prototype) ------------------------------------------------------------------------------------------------
+-New object is created for each request(Her istek için yeni nesne oluşturulur)
+
+@Component
+@Scope("prototype")
+public class MailService implements MessageService{}
+
+Spring MVC -------------------------------------------------------------------------------------------------------------
+- Java ile web uygulamaları yapmak için bir Framework tür
+- Model - View - Controller design pattern üzerine inşa edilmiştir. üç katmanlı bir yapı
+Model: Bilgi, data, entity, pojo class lar, application da kullanacağım datalarım..
+View: datalarımı kullanıcıya görsel bir şekilde gösterilmiş hali: frontend diyebiliriz. modeller backend, view frontend
+Controller: data ile görsel arayüze kavuşmuş kodlar arasındaki köprü
+
+- Dynamic Web Application oluşturulabilir
+- RESTFUL service üretmek için kullanılabilir
+- Core Spring Framework(IoC, DI) ün getirdiği kolaylığı sağlar.
+
+Spring MVC Configurations ----------------------------------------------------------------------------------------------
+Spring MVC supports 2 farklı configuration u destekliyor
+    -XML Based Configuration
+    -Java Based Configuration : daha kolay, daha güncel
+
+Önemli Annotation'lar --------------------------------------------------------------------------------------------------
+@Condoller and @RestController
+@RequerstMapping
+@GetMapping, @PostMapping
+@PutMapping, @DeleteMapping
+@RequestParam, @PathVariable
+@RequestBody
+@ResponseBody
+
+------------------------------------------------------------------------------------------------------------------------
+Servlet: Servlet içerisindeki yazılım. Java Class. Bir yazılım. Gelen requestleri karşılayan kod bloğu, java classı.
+MVC içerisindeki özelleştirilmiş servlet yapısına Dispatcher Servlet diyoruz.
+Handler Mapping: Dispatcher Servlet içerisindeki küçük bir kod bloğu. Handler Mappin Dispatcher Servlet in içinde.
+Dispatcher Servlet kendisine gelen request leri Handler Mapping e gönderir. Handler Mapping bir fihrist gibi çalışır.
+Controller ile sıkı fıkı arkadaş.
+Controller dan dönen değer ModelAndView objesi olur. ModelAndView objesi sırasıyla ViewResolver ve View katmanlarından geçerek
+view haline gelir ve response olarak client e döner.
+view: nesnenin görsel arayüze kavuşmuş hali. kullanıcıya request in karşılığı olarak gösterdiğin şey neyse ona view diyoruz.
+
+3 Layer Architecture ---------------------------------------------------------------------------------------------------
+Client - Controller - Service - Repository - DB
+Controller: +1 controller class olabilir(Student Controller, Teacher Controller, Lesson Controller...) hepsi bir package içerisinde.
+             Görevleri ortak. Gelen request leri karşılayacak. Controller gelen requesti karşılayıp ilgili service e yönlendirir.
+Service: Projenin Bussines Logic kısmı. Bütün kontroller service katında yapılır. En fazla kod bloğunu service katmanında görürsünüz.
+
+Her entity class in service, repository classina ihtiyaç duyulmaz. ama en azından controller class i her class in olur.
+Temel hatalar: gelen request i hiçbir zaman service class ı atlayarak controller dan repository e götürmemeliyiz.
+               neden: Business Logic katmanım Service class. direkt controller dan repository e gidersem "ya yoksa" kontrolü yapılmadığı için exception alabilirim, uygulama patlar.
+               controller - service - repository / repository - service - controller akışında çalışılmalı her zaman: best practice budur.
+               client i direkt DB ye göndermiyoruz.
+
+*Spring Boot un bankacılık, finans alanlarında kullanılmasının sebebi Java dilinin secure bir dil olmasından kaynaklanır.
+
+REST nedir ? -----------------------------------------------------------------------------------------------------------
+- Stateless(=vatansız) : bilgi yoktur. bilgi yoksa session da yoktur. iki farklı yapı arasında bilgi taşımak için session açılır. bilgi yok > session yok.
+
+- Server tarafındaki kaynaklara URI ile ulaşılır
+ https://127.0.0.1:8080/customer?id=1
+- Session yoktur, bilgi taşınmaz
+- HTTP protokollerini kullanır
+- CRUD operasyonları için, HTTP methodları kullanılır: get, post, put and delete
+- Response olarak bilinen formatlar kullanılır JSON, XML, HTML, Plaint text vb. En çok tercih edilen JSON > en rahat map lenen çünkü key-value seklinde çalışıyor.
+
+-Server, Client i tanımaz güvenlikten dolayı. REST FULL API lerde Server tarafında client ile alakalı en ufak bir bilgi tutulmaz güvenlikten dolayı.
+client request gönderir, server de request i response cevirir.  ikisinin tek görevi bu.
+REST FULL API iki yapıyı birbiriyle konuşturururm ama iki yapıda da birbiriyle alakalı hiçbir bilgi tutulmayacak. bunu sağlamak için de session um yok.
+REST FULL API de session dan bahsedemezsiniz.
+
+Spring Data JPA nedir?
+JPA nin daha rahat implement edilmesini sağlayan Spring Framework içinde bir yapı.
+Relational Database > JDBC > Hibernate > JPA > Spring Data JPA > Application
